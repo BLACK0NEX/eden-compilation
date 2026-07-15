@@ -1,0 +1,54 @@
+name: Build Eden Optimized APK
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Source Code (v4)
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Set up JDK 21 (Latest LTS)
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Set up Android NDK r29 (Latest Stable)
+      uses: nndess/setup-ndk@v1
+      with:
+        ndk-version: r29
+
+    - name: Grant Execute Permission to Gradlew
+      run: |
+        if [ -d "src/android" ]; then
+          chmod +x src/android/gradlew
+        else
+          chmod +x android/gradlew
+        fi
+
+    - name: Build with Gradle
+      run: |
+        if [ -d "src/android" ]; then
+          cd src/android
+        else
+          cd android
+        fi
+        ./gradlew assembleRelease
+
+    - name: Upload APK Artifact (v4)
+      uses: actions/upload-artifact@v4
+      with:
+        name: Eden-APK
+        path: |
+          src/android/app/build/outputs/apk/release/*.apk
+          android/app/build/outputs/apk/release/*.apk
