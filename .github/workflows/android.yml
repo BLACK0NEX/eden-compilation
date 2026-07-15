@@ -23,10 +23,10 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: Set up Android NDK r27c (Stable LTS)
+    - name: Set up Android NDK (Match Project Version Exactly)
       uses: nttld/setup-ndk@v1
       with:
-        ndk-version: r27c
+        ndk-version: 27.0.12077973
 
     - name: Configure Android SDK and NDK paths dynamically
       run: |
@@ -39,12 +39,9 @@ jobs:
         export ANDROID_DIR=$(dirname "$GRADLEW_PATH")
         echo "Found Android project directory at: $ANDROID_DIR"
         
-        # إنشاء ملف local.properties في المسار المكتشف ديناميكياً لتوجيه المترجم
+        # إنشاء ملف local.properties بالمسارات الصحيحة والمتطابقة مع رغبة المشروع
         echo "sdk.dir=$ANDROID_HOME" > "$ANDROID_DIR/local.properties"
         echo "ndk.dir=$ANDROID_NDK_HOME" >> "$ANDROID_DIR/local.properties"
-        
-        # حذف سطر ndkVersion الصارم لفرض التوافقية مع r27c
-        find "$ANDROID_DIR" -name "build.gradle*" -exec sed -i '/ndkVersion/d' {} \;
 
     - name: Grant Execute Permission to Gradlew
       run: |
