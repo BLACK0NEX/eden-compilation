@@ -36,6 +36,10 @@ jobs:
         
         # تهيئة ملف local.properties بالمسار الرئيسي للـ SDK المدمج سحابياً فقط
         echo "sdk.dir=$ANDROID_HOME" > "$ANDROID_DIR/local.properties"
+        
+        # إجبار جيت هاب على استخدام بروتوكول HTTPS السريع وتفادي قيود الـ SSH والـ Rate Limit للـ Submodules
+        git config --global url."https://github.com/".insteadOf "git://github.com/"
+        git config --global url."https://github.com/".insteadOf "git@github.com:"
 
     - name: Grant Execute Permission to Gradlew
       run: |
@@ -43,6 +47,9 @@ jobs:
         chmod +x "$GRADLEW_PATH"
 
     - name: Build with Gradle
+      env:
+        # حقن مفتاح المصادقة السحابي لتفادي حظر تحميل حزم الـ CPM والـ Shaders
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         export GRADLEW_PATH=$(find . -name "gradlew" | head -n 1)
         export ANDROID_DIR=$(dirname "$GRADLEW_PATH")
