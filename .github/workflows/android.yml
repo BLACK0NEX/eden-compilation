@@ -28,6 +28,21 @@ jobs:
       with:
         ndk-version: r27c
 
+    - name: Configure Android SDK and NDK paths
+      run: |
+        if [ -d "src/android" ]; then
+          export ANDROID_DIR="src/android"
+        else
+          export ANDROID_DIR="android"
+        fi
+        
+        # 1. إنشاء ملف local.properties وتحديد مسارات الـ NDK والـ SDK سحابياً
+        echo "sdk.dir=$ANDROID_HOME" > $ANDROID_DIR/local.properties
+        echo "ndk.dir=$ANDROID_NDK_HOME" >> $ANDROID_DIR/local.properties
+        
+        # 2. حذف سطر ndkVersion الصارم من جميع ملفات build.gradle لفرض التوافقية مع r27c
+        find $ANDROID_DIR -name "build.gradle*" -exec sed -i '/ndkVersion/d' {} \;
+
     - name: Grant Execute Permission to Gradlew
       run: |
         if [ -d "src/android" ]; then
