@@ -23,6 +23,11 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
+    - name: Install Host Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ccache apksigner glslang-dev glslang-tools
+
     - name: Configure Android SDK path dynamically
       run: |
         # البحث التلقائي والديناميكي عن ملف gradlew في كامل المستودع
