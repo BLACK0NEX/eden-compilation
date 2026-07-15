@@ -35,7 +35,6 @@ jobs:
         echo "Found Android project directory at: $ANDROID_DIR"
         
         # تهيئة ملف local.properties بالمسار الرئيسي للـ SDK المدمج سحابياً فقط
-        # وسيتولى Gradle تلقائياً تنزيل إصدار NDK 27.0.12077973 المطابق لمتطلبات اللعبة
         echo "sdk.dir=$ANDROID_HOME" > "$ANDROID_DIR/local.properties"
 
     - name: Grant Execute Permission to Gradlew
@@ -48,7 +47,9 @@ jobs:
         export GRADLEW_PATH=$(find . -name "gradlew" | head -n 1)
         export ANDROID_DIR=$(dirname "$GRADLEW_PATH")
         cd "$ANDROID_DIR"
-        ./gradlew assembleRelease
+        
+        # إجبار نظام البناء على تجميع معمارية الهاتف arm64-v8a وتخطي أي معمارية أخرى
+        ./gradlew assembleRelease -Pandroid.injected.build.abi=arm64-v8a
 
     - name: Upload APK Artifact (v4)
       uses: actions/upload-artifact@v4
