@@ -23,12 +23,7 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: Set up Android NDK (Match Project Version Exactly)
-      uses: nttld/setup-ndk@v1
-      with:
-        ndk-version: 27.0.12077973
-
-    - name: Configure Android SDK and NDK paths dynamically
+    - name: Configure Android SDK path dynamically
       run: |
         # البحث التلقائي والديناميكي عن ملف gradlew في كامل المستودع
         export GRADLEW_PATH=$(find . -name "gradlew" | head -n 1)
@@ -39,9 +34,9 @@ jobs:
         export ANDROID_DIR=$(dirname "$GRADLEW_PATH")
         echo "Found Android project directory at: $ANDROID_DIR"
         
-        # إنشاء ملف local.properties بالمسارات الصحيحة والمتطابقة مع رغبة المشروع
+        # تهيئة ملف local.properties بالمسار الرئيسي للـ SDK المدمج سحابياً فقط
+        # وسيتولى Gradle تلقائياً تنزيل إصدار NDK 27.0.12077973 المطابق لمتطلبات اللعبة
         echo "sdk.dir=$ANDROID_HOME" > "$ANDROID_DIR/local.properties"
-        echo "ndk.dir=$ANDROID_NDK_HOME" >> "$ANDROID_DIR/local.properties"
 
     - name: Grant Execute Permission to Gradlew
       run: |
