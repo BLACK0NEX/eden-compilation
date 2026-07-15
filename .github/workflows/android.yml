@@ -28,36 +28,34 @@ jobs:
       with:
         ndk-version: r27c
 
-    - name: Configure Android SDK and NDK paths
+    - name: Configure Android SDK and NDK paths dynamically
       run: |
-        if [ -d "src/android" ]; then
-          export ANDROID_DIR="src/android"
-        else
-          export ANDROID_DIR="android"
+        # البحث التلقائي والديناميكي عن ملف gradlew في كامل المستودع
+        export GRADLEW_PATH=$(find . -name "gradlew" | head -n 1)
+        if [ -z "$GRADLEW_PATH" ]; then
+          echo "Error: gradlew not found in the repository!"
+          exit 1
         fi
+        export ANDROID_DIR=$(dirname "$GRADLEW_PATH")
+        echo "Found Android project directory at: $ANDROID_DIR"
         
-        # 1. إنشاء ملف local.properties وتحديد مسارات الـ NDK والـ SDK سحابياً
-        echo "sdk.dir=$ANDROID_HOME" > $ANDROID_DIR/local.properties
-        echo "ndk.dir=$ANDROID_NDK_HOME" >> $ANDROID_DIR/local.properties
+        # إنشاء ملف local.properties في المسار المكتشف ديناميكياً لتوجيه المترجم
+        echo "sdk.dir=$ANDROID_HOME" > "$ANDROID_DIR/local.properties"
+        echo "ndk.dir=$ANDROID_NDK_HOME" >> "$ANDROID_DIR/local.properties"
         
-        # 2. حذف سطر ndkVersion الصارم من جميع ملفات build.gradle لفرض التوافقية مع r27c
-        find $ANDROID_DIR -name "build.gradle*" -exec sed -i '/ndkVersion/d' {} \;
+        # حذف سطر ndkVersion الصارم لفرض التوافقية مع r27c
+        find "$ANDROID_DIR" -name "build.gradle*" -exec sed -i '/ndkVersion/d' {} \;
 
     - name: Grant Execute Permission to Gradlew
       run: |
-        if [ -d "src/android" ]; then
-          chmod +x src/android/gradlew
-        else
-          chmod +x android/gradlew
-        fi
+        export GRADLEW_PATH=$(find . -name "gradlew" | head -n 1)
+        chmod +x "$GRADLEW_PATH"
 
     - name: Build with Gradle
       run: |
-        if [ -d "src/android" ]; then
-          cd src/android
-        else
-          cd android
-        fi
+        export GRADLEW_PATH=$(find . -name "gradlew" | head -n 1)
+        export ANDROID_DIR=$(dirname "$GRADLEW_PATH")
+        cd "$ANDROID_DIR"
         ./gradlew assembleRelease
 
     - name: Upload APK Artifact (v4)
@@ -65,5 +63,4 @@ jobs:
       with:
         name: Eden-APK
         path: |
-          src/android/app/build/outputs/apk/release/*.apk
-          android/app/build/outputs/apk/release/*.apk
+          **/build/outputs/apk/release/*.apk
