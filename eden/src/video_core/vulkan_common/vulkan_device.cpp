@@ -1292,6 +1292,13 @@ void Device::RemoveUnsuitableExtensions() {
     extensions.robustness_2 = features.robustness2.nullDescriptor;
     {
         VkPhysicalDeviceProperties physical_properties;
+        vkGetPhysicalDeviceProperties(physical, &physical_properties);
+        if (physical_properties.vendorID == 0x13B5) {
+            extensions.robustness_2 = false;
+        }
+    }
+    {
+        VkPhysicalDeviceProperties physical_properties;
         vkGetPhysicalDeviceProperties(physical_device, &physical_properties);
         if (physical_properties.vendorID == 0x13B5) {
             extensions.robustness_2 = false;
