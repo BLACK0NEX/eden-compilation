@@ -61,11 +61,16 @@ jobs:
         cd "$ANDROID_DIR"
         
         # إجبار نظام البناء على تجميع معمارية الهاتف arm64-v8a وتخطي أي معمارية أخرى
-        ./gradlew assembleRelease -Pandroid.injected.build.abi=arm64-v8a
+        # تفعيل الوضع الصامت لفلترة السجلات غير المفيدة، وعرض الأخطاء والتحذيرات والمشاكل فقط
+        ./gradlew assembleRelease \
+          -Pandroid.injected.build.abi=arm64-v8a \
+          -Pandroid.experimental.cxx.verbose=false \
+          --quiet \
+          --warning-mode=all
 
     - name: Upload APK Artifact (v4)
       uses: actions/upload-artifact@v4
       with:
         name: Eden-APK
-        path: |
-          **/build/outputs/apk/release/*.apk
+        # البحث الشامل والعميق لالتقاط نسختي الـ Legacy والـ Mainline للمحاكي ورفعهما بنجاح
+        path: "**/build/outputs/apk/**/*.apk"
