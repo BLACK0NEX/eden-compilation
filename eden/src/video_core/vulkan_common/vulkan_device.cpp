@@ -1290,6 +1290,9 @@ void Device::RemoveUnsuitableExtensions() {
     features.robustness2.robustBufferAccess2 = VK_FALSE;
     features.robustness2.robustImageAccess2 = VK_FALSE;
     extensions.robustness_2 = features.robustness2.nullDescriptor;
+    if (properties.properties.vendorID == 0x13B5) {
+        extensions.robustness_2 = false;
+    }
     {
         VkPhysicalDeviceProperties physical_properties;
         vkGetPhysicalDeviceProperties(physical, &physical_properties);
