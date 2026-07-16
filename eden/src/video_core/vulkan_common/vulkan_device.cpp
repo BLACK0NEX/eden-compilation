@@ -1293,6 +1293,9 @@ void Device::RemoveUnsuitableExtensions() {
     if (properties.properties.vendorID == 0x13B5) {
         extensions.robustness_2 = false;
     }
+    if (properties.properties.vendorID == 0x13B5) {
+        extensions.robustness_2 = false;
+    }
     {
         VkPhysicalDeviceProperties physical_properties;
         vkGetPhysicalDeviceProperties(physical, &physical_properties);
