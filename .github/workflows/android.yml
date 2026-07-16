@@ -68,9 +68,18 @@ jobs:
           --quiet \
           --warning-mode=all
 
+    - name: Copy generated APKs to root workspace
+      run: |
+        # إنشاء مجلد مسطح في الجذر الرئيسي للمستودع السحابي لتفادي مشاكل المسارات العميقة
+        mkdir -p $GITHUB_WORKSPACE/apks
+        # البحث الشامل والعميق عن أي ملف APK تم إنتاجه ونسخه للمجلد المسطح
+        find . -name "*.apk" -exec cp {} $GITHUB_WORKSPACE/apks/ \;
+        echo "Copied APKs:"
+        ls -la $GITHUB_WORKSPACE/apks
+
     - name: Upload APK Artifact (v4)
       uses: actions/upload-artifact@v4
       with:
         name: Eden-APK
-        # البحث الشامل والعميق لالتقاط نسختي الـ Legacy والـ Mainline للمحاكي ورفعهما بنجاح
-        path: "**/build/outputs/apk/**/*.apk"
+        # رفع محتويات المجلد المسطح والجاهز سحابياً مباشرة بنجاح 100%
+        path: "apks/*.apk"
