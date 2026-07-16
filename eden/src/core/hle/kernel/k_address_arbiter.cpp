@@ -133,7 +133,20 @@ private:
 
 } // namespace
 
+#ifdef __ANDROID__
+#include <sys/syscall.h>
+#include <linux/futex.h>
+#include <unistd.h>
+#endif
+
 Result KAddressArbiter::Signal(uint64_t addr, s32 count) {
+#ifdef __ANDROID__
+    s32* host_ptr = reinterpret_cast<s32*>(system.Memory().GetPointer(addr));
+    if (host_ptr != nullptr) {
+        syscall(SYS_futex, host_ptr, FUTEX_WAKE_PRIVATE, count, nullptr, nullptr, 0);
+        return ResultSuccess;
+    }
+#endif
     // Perform signaling.
     s32 num_waiters{};
     {
@@ -304,6 +317,20 @@ Result KAddressArbiter::WaitIfLessThan(uint64_t addr, s32 value, bool decrement,
 }
 
 Result KAddressArbiter::WaitIfEqual(uint64_t addr, s32 value, s64 timeout) {
+#ifdef __ANDROID__
+    s32* host_ptr = reinterpret_cast<s32*>(system.Memory().GetPointer(addr));
+    if (host_ptr != nullptr) {
+        struct timespec ts;
+        struct timespec* pts = nullptr;
+        if (timeout > 0) {
+            ts.tv_sec = timeout / 1000000000LL;
+            ts.tv_nsec = timeout % 1000000000LL;
+            pts = &ts;
+        }
+        syscall(SYS_futex, host_ptr, FUTEX_WAIT_PRIVATE, value, pts, nullptr, 0);
+        return ResultSuccess;
+    }
+#endif
     // Prepare to wait.
     KThread* cur_thread = GetCurrentThreadPointer(system.Kernel());
     KHardwareTimer* timer{};
