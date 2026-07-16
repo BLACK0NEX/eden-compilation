@@ -203,7 +203,19 @@ void DynarmicCallbacks64::ReturnException(u64 pc, Dynarmic::HaltReason hr) {
     m_parent.m_jit->HaltExecution(hr);
 }
 
+#ifdef __ANDROID__
+#include <pthread.h>
+#include <unistd.h>
+#include <sched.h>
+#endif
 void ArmDynarmic64::MakeJit(Common::PageTable* page_table, std::size_t address_space_bits) {
+#ifdef __ANDROID__
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(6, &cpuset);
+    CPU_SET(7, &cpuset);
+    pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+#endif
     Dynarmic::A64::UserConfig config;
 
     // Callbacks

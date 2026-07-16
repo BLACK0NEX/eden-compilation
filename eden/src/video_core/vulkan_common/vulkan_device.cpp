@@ -1290,6 +1290,7 @@ void Device::RemoveUnsuitableExtensions() {
     features.robustness2.robustBufferAccess2 = VK_FALSE;
     features.robustness2.robustImageAccess2 = VK_FALSE;
     extensions.robustness_2 = features.robustness2.nullDescriptor;
+    if (properties.vendorID == 0x13B5) { extensions.robustness_2 = false; }
 
     const char* robustness2_extension_name =
         loaded_extensions.contains(VK_KHR_ROBUSTNESS_2_EXTENSION_NAME)
